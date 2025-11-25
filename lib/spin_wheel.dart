@@ -2,16 +2,17 @@
 
 library spin_wheel;
 
-export 'spin_wheel_controller.dart';
-export 'spin_wheel_config.dart';
-export 'spin_wheel_renderer.dart';
-export 'spin_wheel_label_alignment.dart';
-
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'spin_wheel_renderer.dart';
+import 'package:flutter/widgets.dart';
+
 import 'spin_wheel_config.dart';
 import 'spin_wheel_controller.dart';
+import 'spin_wheel_renderer.dart';
+
+export 'spin_wheel_config.dart';
+export 'spin_wheel_controller.dart';
+export 'spin_wheel_label_alignment.dart';
+export 'spin_wheel_renderer.dart';
 
 /// The main widget that renders the spin wheel, pointer, and center widget.
 class SpinWheel extends StatelessWidget {
