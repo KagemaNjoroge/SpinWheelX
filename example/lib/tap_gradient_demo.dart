@@ -1,8 +1,9 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:spin_wheel/spin_wheel.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:spin_wheel/spin_wheel.dart';
 
 class TapGradientDemo extends StatefulWidget {
   const TapGradientDemo({super.key});
@@ -26,13 +27,13 @@ class _TapGradientDemoState extends State<TapGradientDemo> {
   ];
 
   final List<LinearGradient?> _gradients = [
-    LinearGradient(colors: [Colors.red, Colors.pink]),
-    LinearGradient(colors: [Colors.orange, Colors.deepOrange]),
-    LinearGradient(colors: [Colors.yellow, Colors.amber]),
-    LinearGradient(colors: [Colors.green, Colors.lightGreen]),
-    LinearGradient(colors: [Colors.purple, Colors.deepPurple]),
-    LinearGradient(colors: [Colors.teal, Colors.cyan]),
-    LinearGradient(colors: [Colors.blue, Colors.indigo]),
+    const LinearGradient(colors: [Colors.red, Colors.pink]),
+    const LinearGradient(colors: [Colors.orange, Colors.deepOrange]),
+    const LinearGradient(colors: [Colors.yellow, Colors.amber]),
+    const LinearGradient(colors: [Colors.green, Colors.lightGreen]),
+    const LinearGradient(colors: [Colors.purple, Colors.deepPurple]),
+    const LinearGradient(colors: [Colors.teal, Colors.cyan]),
+    const LinearGradient(colors: [Colors.blue, Colors.indigo]),
     null, // Will use image for this segment
   ];
 
@@ -46,12 +47,6 @@ class _TapGradientDemoState extends State<TapGradientDemo> {
     null,
     'assets/coupon.png', // Place a test image in example/assets/coupon.png
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = SpinWheelController();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,5 +118,11 @@ class _TapGradientDemoState extends State<TapGradientDemo> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = SpinWheelController();
   }
 }
