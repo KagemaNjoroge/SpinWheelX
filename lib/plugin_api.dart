@@ -14,15 +14,15 @@ typedef SegmentRenderer = Widget Function(BuildContext context, int index, dynam
 class SpinWheelPluginRegistry {
   static final Map<String, SegmentRenderer> _renderers = {};
 
+    /// Retrieves a registered [SegmentRenderer] for a given content [type].
+  ///
+  /// Returns `null` if no renderer is found for the specified type.
+  static SegmentRenderer? getRenderer(String type) => _renderers[type];
+
     /// Registers a [SegmentRenderer] for a specific content [type].
   ///
   /// This is typically called by a plugin's initialization logic.
   static void registerRenderer(String type, SegmentRenderer renderer) {
     _renderers[type] = renderer;
   }
-
-    /// Retrieves a registered [SegmentRenderer] for a given content [type].
-  ///
-  /// Returns `null` if no renderer is found for the specified type.
-  static SegmentRenderer? getRenderer(String type) => _renderers[type];
 }
