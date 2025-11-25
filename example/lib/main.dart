@@ -1,28 +1,15 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:spin_wheel/spin_wheel.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'tap_gradient_demo.dart';
+import 'package:spin_wheel/spin_wheel.dart';
+
 import 'image_demo.dart';
+import 'tap_gradient_demo.dart';
 // import 'package:lottie/lottie.dart'; // Uncomment if you use Lottie files
 
 void main() {
   runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Spin Wheel Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const DemoHomeTabs(),
-    );
-  }
 }
 
 class DemoHomeTabs extends StatelessWidget {
@@ -44,14 +31,29 @@ class DemoHomeTabs extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
-            const SpinWheelDemo(),
-            const TapGradientDemo(),
+            SpinWheelDemo(),
+            TapGradientDemo(),
             ImageDemo(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Spin Wheel Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const DemoHomeTabs(),
     );
   }
 }
@@ -61,6 +63,149 @@ class SpinWheelDemo extends StatefulWidget {
 
   @override
   State<SpinWheelDemo> createState() => _SpinWheelDemoState();
+}
+
+class _AnimatedSpinButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  const _AnimatedSpinButton({required this.onPressed});
+
+  @override
+  State<_AnimatedSpinButton> createState() => _AnimatedSpinButtonState();
+}
+
+class _AnimatedSpinButtonState extends State<_AnimatedSpinButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnim;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnim.value,
+          child: child,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 18),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF00C6FB), Color(0xFF005BEA)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.18),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            'Spin!',
+            style: GoogleFonts.montserrat(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      lowerBound: 0.0,
+      upperBound: 0.1,
+    );
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.95).animate(_controller);
+  }
+
+  void _onTapCancel() {
+    _controller.reverse();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    _controller.forward();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _controller.reverse();
+    widget.onPressed();
+  }
+}
+
+/// A custom clipper to create the teardrop-shaped pointer.
+class _ArrowClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(size.width / 2, 0);
+    path.quadraticBezierTo(0, size.height / 2, size.width / 2, size.height);
+    path.quadraticBezierTo(size.width, size.height / 2, size.width / 2, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class _ReferencePointer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 44,
+      height: 56,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          // Circle at the top
+          Positioned(
+            top: 0,
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          // Triangle/teardrop below
+          Positioned(
+            top: 20,
+            child: ClipPath(
+              clipper: _ArrowClipper(),
+              child: Container(
+                width: 32,
+                height: 36,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SpinWheelDemoState extends State<SpinWheelDemo> {
@@ -79,21 +224,15 @@ class _SpinWheelDemoState extends State<SpinWheelDemo> {
   ];
 
   final List<Color> _colors = [
-    Color(0xFFFFD600), // Yellow
-    Color(0xFFFF9100), // Orange
-    Color(0xFFFF1744), // Red
-    Color(0xFFF06292), // Pink
-    Color(0xFF757575), // Gray
-    Color(0xFF00BFAE), // Teal
-    Color(0xFF2979FF), // Blue
-    Color(0xFF8E24AA), // Purple
+    const Color(0xFFFFD600), // Yellow
+    const Color(0xFFFF9100), // Orange
+    const Color(0xFFFF1744), // Red
+    const Color(0xFFF06292), // Pink
+    const Color(0xFF757575), // Gray
+    const Color(0xFF00BFAE), // Teal
+    const Color(0xFF2979FF), // Blue
+    const Color(0xFF8E24AA), // Purple
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = SpinWheelController();
-  }
 
   // The controller no longer needs to be disposed.
 
@@ -170,7 +309,7 @@ class _SpinWheelDemoState extends State<SpinWheelDemo> {
                     ),
                   ),
                   // Pointer above the wheel (last in the list = on top)
-                  Positioned(
+                  const Positioned(
                     top: -28,
                     child: _SvgStylePointer(small: true, withShadow: true),
                   ),
@@ -188,167 +327,11 @@ class _SpinWheelDemoState extends State<SpinWheelDemo> {
       ),
     );
   }
-}
-
-/// A custom clipper to create the teardrop-shaped pointer.
-class _ArrowClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    path.moveTo(size.width / 2, 0);
-    path.quadraticBezierTo(0, size.height / 2, size.width / 2, size.height);
-    path.quadraticBezierTo(size.width, size.height / 2, size.width / 2, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-class _ReferencePointer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 44,
-      height: 56,
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          // Circle at the top
-          Positioned(
-            top: 0,
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          // Triangle/teardrop below
-          Positioned(
-            top: 20,
-            child: ClipPath(
-              clipper: _ArrowClipper(),
-              child: Container(
-                width: 32,
-                height: 36,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AnimatedSpinButton extends StatefulWidget {
-  final VoidCallback onPressed;
-  const _AnimatedSpinButton({required this.onPressed});
-
-  @override
-  State<_AnimatedSpinButton> createState() => _AnimatedSpinButtonState();
-}
-
-class _AnimatedSpinButtonState extends State<_AnimatedSpinButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-      lowerBound: 0.0,
-      upperBound: 0.1,
-    );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.95).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    _controller.reverse();
-    widget.onPressed();
-  }
-
-  void _onTapCancel() {
-    _controller.reverse();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnim.value,
-          child: child,
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 18),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF00C6FB), Color(0xFF005BEA)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.18),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            'Spin!',
-            style: GoogleFonts.montserrat(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SvgStylePointer extends StatelessWidget {
-  final bool small;
-  final bool withShadow;
-  const _SvgStylePointer({this.small = false, this.withShadow = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final width = small ? 54.0 : 44.0;
-    final height = small ? 68.0 : 56.0;
-    return SizedBox(
-      width: width,
-      height: height,
-      child: CustomPaint(
-        painter: _SvgPointerPainter(withShadow: withShadow),
-      ),
-    );
+    _controller = SpinWheelController();
   }
 }
 
@@ -361,7 +344,7 @@ class _SvgPointerPainter extends CustomPainter {
     if (withShadow) {
       final shadowPaint = Paint()
         ..color = Colors.black.withOpacity(0.25)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 6);
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
       // Draw shadow for circle
       final circleRadius = size.width * 0.36;
       final circleCenter = Offset(size.width / 2, circleRadius + 2);
@@ -416,18 +399,37 @@ class _SvgPointerPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+class _SvgStylePointer extends StatelessWidget {
+  final bool small;
+  final bool withShadow;
+  const _SvgStylePointer({this.small = false, this.withShadow = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = small ? 54.0 : 44.0;
+    final height = small ? 68.0 : 56.0;
+    return SizedBox(
+      width: width,
+      height: height,
+      child: CustomPaint(
+        painter: _SvgPointerPainter(withShadow: withShadow),
+      ),
+    );
+  }
+}
+
 class _VibrantBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Draw radial gradient
     final rect = Offset.zero & size;
-    final gradient = RadialGradient(
-      center: const Alignment(0, -0.1),
+    const gradient = RadialGradient(
+      center: Alignment(0, -0.1),
       radius: 1.1,
       colors: [
-        const Color(0xFFFFF176), // Light yellow
-        const Color(0xFFFFD600), // Yellow
-        const Color(0xFFFF9800), // Orange
+        Color(0xFFFFF176), // Light yellow
+        Color(0xFFFFD600), // Yellow
+        Color(0xFFFF9800), // Orange
       ],
       stops: [0.0, 0.6, 1.0],
     );
@@ -454,6 +456,9 @@ class _VibrantBackgroundPainter extends CustomPainter {
     }
   }
 
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+
   void _drawStar(
       Canvas canvas, Offset center, double radius, int points, Paint paint) {
     final path = Path();
@@ -471,7 +476,4 @@ class _VibrantBackgroundPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, paint);
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
